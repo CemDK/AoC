@@ -23,9 +23,6 @@ part1(T) :- T = #sum { V,S : mid_value(S,V), valid(S) }.
 PART_2 = """
 seq(S) :- new_sequence(S,_,_).
 
-seq_len(S,M) :- M = #max { P : new_sequence(S,P,_) }, seq(S).
-seq_values(S,V) :- new_sequence(S,_,V).
-
 mid_index(S,I) :- M = #max{ P : new_sequence(S,P,_) }, seq(S), I = (M+1)/2.
 mid_value(S,V) :- mid_index(S,I), new_sequence(S,I,V).
 
@@ -40,14 +37,9 @@ seq(S) :- sequence(S,_,_).
 notValid(S) :- sequence(S,X,A), sequence(S,Y,B), seq(S), rule(B,A), X<Y.
 
 seq_len(S,M) :- M = #max { P : sequence(S,P,_) }, seq(S).
-seq_values(S,V) :- sequence(S,_,V).
 
-1 { new_sequence(S,1,V) : sequence(S,I,V) } 1  :- notValid(S).
-1 { new_sequence(S,I+1,V) : seq_values(S,V) } 1 :- new_sequence(S,I,_), seq_len(S,M), I<M.
-
-:- new_sequence(S,X,A), new_sequence(S,Y,B), rule(B,A), X<Y.
-:- new_sequence(S,X,A), new_sequence(S,Y,B), X==Y, A!=B.
-:- new_sequence(S,X,A), new_sequence(S,Y,A), X!=Y.
+1 { new_sequence(S,1,V) : sequence(S,I,V), notValid(S) } 1.
+1 { new_sequence(S,I+1,V2) : rule(V1,V2), sequence(S,_,V2) } 1 :- new_sequence(S,I,V1), seq_len(S,M), I<M.
 
 #show new_sequence/3.
 """
@@ -78,8 +70,8 @@ def get_new_seq(encoding, instance):
     cmd = ['clingo', instance, '-', '0']
     result = subprocess.run(cmd, input=encoding, capture_output=True, text=True)
     for line in result.stdout.splitlines():
-        if "new_sequence" not in line:
-            print(line)
+        #if "new_sequence" not in line:
+        print(line)
     if result.stderr:
         print("Errors:", result.stderr)
     with open('new_sequence.lp', 'w') as f:
